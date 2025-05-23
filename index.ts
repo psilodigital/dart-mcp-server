@@ -419,6 +419,28 @@ const DELETE_TASK_TOOL: Tool = {
   },
 };
 
+const ADD_TASK_COMMENT_TOOL: Tool = {
+  name: "add_task_comment",
+  description:
+    "Add a comment to an existing task without modifying the task description. Comments support markdown formatting.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      taskId: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the task",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
+      text: {
+        type: "string",
+        description:
+          "The full content of the comment, which can include markdown formatting.",
+      },
+    },
+    required: ["taskId", "text"],
+  },
+};
+
 const LIST_DOCS_TOOL: Tool = {
   name: "list_docs",
   description:
@@ -557,27 +579,6 @@ const DELETE_DOC_TOOL: Tool = {
       },
     },
     required: ["id"],
-  },
-};
-
-const ADD_TASK_COMMENT_TOOL: Tool = {
-  name: "add_task_comment",
-  description:
-    "Add a comment to an existing task without modifying the task description. Comments support markdown formatting.",
-  inputSchema: {
-    type: "object",
-    properties: {
-      taskId: {
-        type: "string",
-        description: "The 12-character alphanumeric ID of the task",
-        pattern: "^[a-zA-Z0-9]{12}$",
-      },
-      text: {
-        type: "string",
-        description: "The full content of the comment, which can include markdown formatting",
-      },
-    },
-    required: ["taskId", "text"],
   },
 };
 
