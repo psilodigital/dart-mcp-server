@@ -561,7 +561,7 @@ const DELETE_DOC_TOOL: Tool = {
 };
 
 const ADD_TASK_COMMENT_TOOL: Tool = {
-  name: "add_comment_task",
+  name: "add_task_comment",
   description:
     "Add a comment/note to an existing task without modifying the task description. Comments support markdown formatting.",
   inputSchema: {
