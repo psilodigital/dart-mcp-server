@@ -737,7 +737,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     GET_TASK_TOOL,
     UPDATE_TASK_TOOL,
     DELETE_TASK_TOOL,
-    ADD_COMMENT_TASK_TOOL,
+    ADD_TASK_COMMENT_TOOL,
     LIST_DOCS_TOOL,
     CREATE_DOC_TOOL,
     GET_DOC_TOOL,
