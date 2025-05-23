@@ -796,7 +796,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
         };
       }
-      case "add_comment_task": {
+      case "add_task_comment": {
         const taskId = getIdValidated(request.params.arguments.taskId);
         const text = request.params.arguments.text;
         const commentData = { taskId, text } as CommentCreate;
