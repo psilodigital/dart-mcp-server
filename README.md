@@ -62,6 +62,7 @@ The following tools are available
 - `get_task` - Retrieve an existing task by its ID
 - `update_task` - Update an existing task's properties
 - `delete_task` - Move a task to the trash (recoverable)
+- `add_task_comment` - Add a comment to an existing task
 
 #### Document management
 
