@@ -574,7 +574,7 @@ const ADD_TASK_COMMENT_TOOL: Tool = {
       },
       text: {
         type: "string",
-        description: "The comment text (supports markdown formatting)",
+        description: "The full content of the comment, which can include markdown formatting",
       },
     },
     required: ["taskId", "text"],
