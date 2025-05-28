@@ -2,7 +2,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   Prompt,
   ResourceTemplate,
-  Tool
+  Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import {
   CommentCreate,
@@ -13,7 +13,7 @@ import {
   DocUpdate,
   TaskCreate,
   TaskService,
-  TaskUpdate
+  TaskUpdate,
 } from "dart-tools";
 import "dotenv/config";
 import express from "express";
@@ -52,7 +52,11 @@ const CREATE_TASK_PROMPT: Prompt = {
   description: "Create a new task in Dart",
   arguments: [
     { name: "title", description: "Title of the task", required: true },
-    { name: "description", description: "Description of the task", required: false },
+    {
+      name: "description",
+      description: "Description of the task",
+      required: false,
+    },
     { name: "status", description: "Status of the task", required: false },
     { name: "priority", description: "Priority of the task", required: false },
     { name: "assignee", description: "Email of the assignee", required: false },
@@ -65,7 +69,11 @@ const CREATE_DOC_PROMPT: Prompt = {
   arguments: [
     { name: "title", description: "Title of the document", required: true },
     { name: "text", description: "Content of the document", required: false },
-    { name: "folder", description: "Folder to place the document in", required: false },
+    {
+      name: "folder",
+      description: "Folder to place the document in",
+      required: false,
+    },
   ],
 };
 const SUMMARIZE_TASKS_PROMPT_NAME = "Summarize tasks";
@@ -73,8 +81,16 @@ const SUMMARIZE_TASKS_PROMPT: Prompt = {
   name: SUMMARIZE_TASKS_PROMPT_NAME,
   description: "Get a summary of tasks with optional filtering",
   arguments: [
-    { name: "status", description: "Filter by status (e.g., 'In Progress', 'Done')", required: false },
-    { name: "assignee", description: "Filter by assignee email", required: false },
+    {
+      name: "status",
+      description: "Filter by status (e.g., 'In Progress', 'Done')",
+      required: false,
+    },
+    {
+      name: "assignee",
+      description: "Filter by assignee email",
+      required: false,
+    },
   ],
 };
 
@@ -82,29 +98,43 @@ const SUMMARIZE_TASKS_PROMPT: Prompt = {
 const CONFIG_RESOURCE_TEMPLATE: ResourceTemplate = {
   uriTemplate: "dart-config:",
   name: "Dart config",
-  description: "Information about the authenticated user associated with the API key, including their role, teams, and settings.",
+  description:
+    "Information about the authenticated user associated with the API key, including their role, teams, and settings.",
   parameters: {},
   examples: ["dart-config:"],
 };
 const TASK_RESOURCE_TEMPLATE: ResourceTemplate = {
   uriTemplate: "dart-task:///{taskId}",
   name: "Dart task",
-  description: "A Dart task with its title, description, status, priority, dates, and more. Use this to fetch detailed information about a specific task.",
-  parameters: { taskId: { type: "string", description: "The unique identifier of the Dart task" } },
+  description:
+    "A Dart task with its title, description, status, priority, dates, and more. Use this to fetch detailed information about a specific task.",
+  parameters: {
+    taskId: {
+      type: "string",
+      description: "The unique identifier of the Dart task",
+    },
+  },
   examples: ["dart-task:///9q5qtB8n2Qn6"],
 };
 const DOC_RESOURCE_TEMPLATE: ResourceTemplate = {
   uriTemplate: "dart-doc:///{docId}",
   name: "Dart doc",
-  description: "A Dart doc with its title, text content, and folder. Use this to fetch detailed information about a specific doc.",
-  parameters: { docId: { type: "string", description: "The unique identifier of the Dart doc" } },
+  description:
+    "A Dart doc with its title, text content, and folder. Use this to fetch detailed information about a specific doc.",
+  parameters: {
+    docId: {
+      type: "string",
+      description: "The unique identifier of the Dart doc",
+    },
+  },
   examples: ["dart-doc:///9q5qtB8n2Qn6"],
 };
 
 // --- TOOLS ---
 const GET_CONFIG_TOOL: Tool = {
   name: "get_config",
-  description: "Get information about the user's space, including all of the possible values that can be provided to other endpoints. This includes available assignees, dartboards, folders, statuses, tags, priorities, and sizes.",
+  description:
+    "Get information about the user's space, including all of the possible values that can be provided to other endpoints. This includes available assignees, dartboards, folders, statuses, tags, priorities, and sizes.",
   inputSchema: { type: "object", properties: {}, required: [] },
 };
 const LIST_TASKS_TOOL: Tool = {
@@ -114,13 +144,25 @@ const LIST_TASKS_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      assignee: { type: "string", description: "Filter by assignee name or email" },
+      assignee: {
+        type: "string",
+        description: "Filter by assignee name or email",
+      },
       assignee_duid: { type: "string", description: "Filter by assignee ID" },
       dartboard: { type: "string", description: "Filter by dartboard title" },
       dartboard_duid: { type: "string", description: "Filter by dartboard ID" },
-      description: { type: "string", description: "Filter by description content" },
-      due_at_before: { type: "string", description: "Filter by due date before (ISO format)" },
-      due_at_after: { type: "string", description: "Filter by due date after (ISO format)" },
+      description: {
+        type: "string",
+        description: "Filter by description content",
+      },
+      due_at_before: {
+        type: "string",
+        description: "Filter by due date before (ISO format)",
+      },
+      due_at_after: {
+        type: "string",
+        description: "Filter by due date after (ISO format)",
+      },
       duids: { type: "string", description: "Filter by IDs" },
       in_trash: { type: "boolean", description: "Filter by trash status" },
       is_draft: { type: "boolean", description: "Filter by draft status" },
@@ -129,11 +171,20 @@ const LIST_TASKS_TOOL: Tool = {
       offset: { type: "number", description: "Initial index for pagination" },
       priority: { type: "string", description: "Filter by priority" },
       size: { type: "number", description: "Filter by task size" },
-      start_at_before: { type: "string", description: "Filter by start date before (ISO format)" },
-      start_at_after: { type: "string", description: "Filter by start date after (ISO format)" },
+      start_at_before: {
+        type: "string",
+        description: "Filter by start date before (ISO format)",
+      },
+      start_at_after: {
+        type: "string",
+        description: "Filter by start date after (ISO format)",
+      },
       status: { type: "string", description: "Filter by status" },
       status_duid: { type: "string", description: "Filter by status ID" },
-      subscriber_duid: { type: "string", description: "Filter by subscriber ID" },
+      subscriber_duid: {
+        type: "string",
+        description: "Filter by subscriber ID",
+      },
       tag: { type: "string", description: "Filter by tag" },
       title: { type: "string", description: "Filter by title" },
     },
@@ -147,17 +198,57 @@ const CREATE_TASK_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      title: { type: "string", description: "The title of the task (required)" },
-      description: { type: "string", description: "A longer description of the task, which can include markdown formatting" },
-      status: { type: "string", description: "The status from the list of available statuses" },
-      priority: { type: "string", description: "The priority (Critical, High, Medium, or Low)" },
-      size: { type: "number", description: "A number that represents the amount of work needed" },
-      startAt: { type: "string", description: "The start date in ISO format (should be at 9:00am in user's timezone)" },
-      dueAt: { type: "string", description: "The due date in ISO format (should be at 9:00am in user's timezone)" },
-      dartboard: { type: "string", description: "The title of the dartboard (project or list of tasks)" },
-      assignees: { type: "array", items: { type: "string" }, description: "Array of assignee names or emails (if workspace allows multiple assignees)" },
-      assignee: { type: "string", description: "Single assignee name or email (if workspace doesn't allow multiple assignees)" },
-      tags: { type: "array", items: { type: "string" }, description: "Array of tags to apply to the task" },
+      title: {
+        type: "string",
+        description: "The title of the task (required)",
+      },
+      description: {
+        type: "string",
+        description:
+          "A longer description of the task, which can include markdown formatting",
+      },
+      status: {
+        type: "string",
+        description: "The status from the list of available statuses",
+      },
+      priority: {
+        type: "string",
+        description: "The priority (Critical, High, Medium, or Low)",
+      },
+      size: {
+        type: "number",
+        description: "A number that represents the amount of work needed",
+      },
+      startAt: {
+        type: "string",
+        description:
+          "The start date in ISO format (should be at 9:00am in user's timezone)",
+      },
+      dueAt: {
+        type: "string",
+        description:
+          "The due date in ISO format (should be at 9:00am in user's timezone)",
+      },
+      dartboard: {
+        type: "string",
+        description: "The title of the dartboard (project or list of tasks)",
+      },
+      assignees: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Array of assignee names or emails (if workspace allows multiple assignees)",
+      },
+      assignee: {
+        type: "string",
+        description:
+          "Single assignee name or email (if workspace doesn't allow multiple assignees)",
+      },
+      tags: {
+        type: "array",
+        items: { type: "string" },
+        description: "Array of tags to apply to the task",
+      },
       parentId: { type: "string", description: "The ID of the parent task" },
     },
     required: ["title"],
@@ -170,7 +261,11 @@ const GET_TASK_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      id: { type: "string", description: "The 12-character alphanumeric ID of the task", pattern: "^[a-zA-Z0-9]{12}$" },
+      id: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the task",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
     },
     required: ["id"],
   },
@@ -182,18 +277,59 @@ const UPDATE_TASK_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      id: { type: "string", description: "The 12-character alphanumeric ID of the task", pattern: "^[a-zA-Z0-9]{12}$" },
+      id: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the task",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
       title: { type: "string", description: "The title of the task" },
-      description: { type: "string", description: "A longer description of the task, which can include markdown formatting" },
-      status: { type: "string", description: "The status from the list of available statuses" },
-      priority: { type: "string", description: "The priority (Critical, High, Medium, or Low)" },
-      size: { type: "number", description: "A number that represents the amount of work needed" },
-      startAt: { type: "string", description: "The start date in ISO format (should be at 9:00am in user's timezone)" },
-      dueAt: { type: "string", description: "The due date in ISO format (should be at 9:00am in user's timezone)" },
-      dartboard: { type: "string", description: "The title of the dartboard (project or list of tasks)" },
-      assignees: { type: "array", items: { type: "string" }, description: "Array of assignee names or emails (if workspace allows multiple assignees)" },
-      assignee: { type: "string", description: "Single assignee name or email (if workspace doesn't allow multiple assignees)" },
-      tags: { type: "array", items: { type: "string" }, description: "Array of tags to apply to the task" },
+      description: {
+        type: "string",
+        description:
+          "A longer description of the task, which can include markdown formatting",
+      },
+      status: {
+        type: "string",
+        description: "The status from the list of available statuses",
+      },
+      priority: {
+        type: "string",
+        description: "The priority (Critical, High, Medium, or Low)",
+      },
+      size: {
+        type: "number",
+        description: "A number that represents the amount of work needed",
+      },
+      startAt: {
+        type: "string",
+        description:
+          "The start date in ISO format (should be at 9:00am in user's timezone)",
+      },
+      dueAt: {
+        type: "string",
+        description:
+          "The due date in ISO format (should be at 9:00am in user's timezone)",
+      },
+      dartboard: {
+        type: "string",
+        description: "The title of the dartboard (project or list of tasks)",
+      },
+      assignees: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Array of assignee names or emails (if workspace allows multiple assignees)",
+      },
+      assignee: {
+        type: "string",
+        description:
+          "Single assignee name or email (if workspace doesn't allow multiple assignees)",
+      },
+      tags: {
+        type: "array",
+        items: { type: "string" },
+        description: "Array of tags to apply to the task",
+      },
       parentId: { type: "string", description: "The ID of the parent task" },
     },
     required: ["id"],
@@ -201,11 +337,16 @@ const UPDATE_TASK_TOOL: Tool = {
 };
 const DELETE_TASK_TOOL: Tool = {
   name: "delete_task",
-  description: "Move an existing task to the trash, where it can be recovered if needed. Nothing else about the task will be changed.",
+  description:
+    "Move an existing task to the trash, where it can be recovered if needed. Nothing else about the task will be changed.",
   inputSchema: {
     type: "object",
     properties: {
-      id: { type: "string", description: "The 12-character alphanumeric ID of the task", pattern: "^[a-zA-Z0-9]{12}$" },
+      id: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the task",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
     },
     required: ["id"],
   },
@@ -216,7 +357,11 @@ const ADD_TASK_COMMENT_TOOL: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      taskId: { type: "string", description: "The 12-character alphanumeric ID of the task", pattern: "^[a-zA-Z0-9]{12}$" },
+      taskId: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the task",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
       text: { type: "string", description: "The comment text" },
     },
     required: ["taskId", "text"],
@@ -224,7 +369,8 @@ const ADD_TASK_COMMENT_TOOL: Tool = {
 };
 const LIST_DOCS_TOOL: Tool = {
   name: "list_docs",
-  description: "List docs from Dart with optional filtering parameters. You can filter by folder, title, text content, and more.",
+  description:
+    "List docs from Dart with optional filtering parameters. You can filter by folder, title, text content, and more.",
   inputSchema: {
     type: "object",
     properties: {
@@ -235,7 +381,10 @@ const LIST_DOCS_TOOL: Tool = {
       is_draft: { type: "boolean", description: "Filter by draft status" },
       limit: { type: "number", description: "Number of results per page" },
       offset: { type: "number", description: "Initial index for pagination" },
-      s: { type: "string", description: "Search by title, text, or folder title" },
+      s: {
+        type: "string",
+        description: "Search by title, text, or folder title",
+      },
       text: { type: "string", description: "Filter by text content" },
       title: { type: "string", description: "Filter by title" },
     },
@@ -244,49 +393,79 @@ const LIST_DOCS_TOOL: Tool = {
 };
 const CREATE_DOC_TOOL: Tool = {
   name: "create_doc",
-  description: "Create a new doc in Dart. You can specify title, text content, and folder.",
+  description:
+    "Create a new doc in Dart. You can specify title, text content, and folder.",
   inputSchema: {
     type: "object",
     properties: {
       title: { type: "string", description: "The title of the doc (required)" },
-      text: { type: "string", description: "The text content of the doc, which can include markdown formatting" },
-      folder: { type: "string", description: "The title of the folder to place the doc in" },
+      text: {
+        type: "string",
+        description:
+          "The text content of the doc, which can include markdown formatting",
+      },
+      folder: {
+        type: "string",
+        description: "The title of the folder to place the doc in",
+      },
     },
     required: ["title"],
   },
 };
 const GET_DOC_TOOL: Tool = {
   name: "get_doc",
-  description: "Retrieve an existing doc by its ID. Returns the doc's information including title, text content, folder, and more.",
+  description:
+    "Retrieve an existing doc by its ID. Returns the doc's information including title, text content, folder, and more.",
   inputSchema: {
     type: "object",
     properties: {
-      id: { type: "string", description: "The 12-character alphanumeric ID of the doc", pattern: "^[a-zA-Z0-9]{12}$" },
+      id: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the doc",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
     },
     required: ["id"],
   },
 };
 const UPDATE_DOC_TOOL: Tool = {
   name: "update_doc",
-  description: "Update an existing doc. You can modify its title, text content, and folder.",
+  description:
+    "Update an existing doc. You can modify its title, text content, and folder.",
   inputSchema: {
     type: "object",
     properties: {
-      id: { type: "string", description: "The 12-character alphanumeric ID of the doc", pattern: "^[a-zA-Z0-9]{12}$" },
+      id: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the doc",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
       title: { type: "string", description: "The title of the doc" },
-      text: { type: "string", description: "The text content of the doc, which can include markdown formatting" },
-      folder: { type: "string", description: "The title of the folder to place the doc in" },
+      text: {
+        type: "string",
+        description:
+          "The text content of the doc, which can include markdown formatting",
+      },
+      folder: {
+        type: "string",
+        description: "The title of the folder to place the doc in",
+      },
     },
     required: ["id"],
   },
 };
 const DELETE_DOC_TOOL: Tool = {
   name: "delete_doc",
-  description: "Move an existing doc to the trash, where it can be recovered if needed. Nothing else about the doc will be changed.",
+  description:
+    "Move an existing doc to the trash, where it can be recovered if needed. Nothing else about the doc will be changed.",
   inputSchema: {
     type: "object",
     properties: {
-      id: { type: "string", description: "The 12-character alphanumeric ID of the doc", pattern: "^[a-zA-Z0-9]{12}$" },
+      id: {
+        type: "string",
+        description: "The 12-character alphanumeric ID of the doc",
+        pattern: "^[a-zA-Z0-9]{12}$",
+      },
     },
     required: ["id"],
   },
@@ -361,7 +540,11 @@ handlers["getPrompt"] = async (params: any) => {
   throw new Error(`Unknown prompt: ${promptName}`);
 };
 handlers["listResourceTemplates"] = async (params: any) => ({
-  resourceTemplates: [CONFIG_RESOURCE_TEMPLATE, TASK_RESOURCE_TEMPLATE, DOC_RESOURCE_TEMPLATE],
+  resourceTemplates: [
+    CONFIG_RESOURCE_TEMPLATE,
+    TASK_RESOURCE_TEMPLATE,
+    DOC_RESOURCE_TEMPLATE,
+  ],
 });
 handlers["readResource"] = async (params: any) => {
   const { uri } = params;
@@ -372,7 +555,11 @@ handlers["readResource"] = async (params: any) => {
     const config = await ConfigService.getConfig();
     return {
       contents: [
-        { uri, mimeType: "application/json", text: JSON.stringify(config, null, 2) },
+        {
+          uri,
+          mimeType: "application/json",
+          text: JSON.stringify(config, null, 2),
+        },
       ],
     };
   }
@@ -380,7 +567,11 @@ handlers["readResource"] = async (params: any) => {
     const task = await TaskService.retrieveTask(path);
     return {
       contents: [
-        { uri, mimeType: "application/json", text: JSON.stringify(task, null, 2) },
+        {
+          uri,
+          mimeType: "application/json",
+          text: JSON.stringify(task, null, 2),
+        },
       ],
     };
   }
@@ -388,7 +579,11 @@ handlers["readResource"] = async (params: any) => {
     const doc = await DocService.retrieveDoc(path);
     return {
       contents: [
-        { uri, mimeType: "application/json", text: JSON.stringify(doc, null, 2) },
+        {
+          uri,
+          mimeType: "application/json",
+          text: JSON.stringify(doc, null, 2),
+        },
       ],
     };
   }
@@ -415,64 +610,88 @@ handlers["callTool"] = async (params: any) => {
   switch (params.name) {
     case "get_config": {
       const config = await ConfigService.getConfig();
-      return { content: [{ type: "text", text: JSON.stringify(config, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(config, null, 2) }],
+      };
     }
     case "list_tasks": {
       const tasks = await TaskService.listTasks(params.arguments);
-      return { content: [{ type: "text", text: JSON.stringify(tasks, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(tasks, null, 2) }],
+      };
     }
     case "create_task": {
       const taskData = params.arguments as TaskCreate;
       const task = await TaskService.createTask({ item: taskData });
-      return { content: [{ type: "text", text: JSON.stringify(task, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
+      };
     }
     case "get_task": {
       const id = getIdValidated(params.arguments.id);
       const task = await TaskService.retrieveTask(id);
-      return { content: [{ type: "text", text: JSON.stringify(task, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
+      };
     }
     case "update_task": {
       const id = getIdValidated(params.arguments.id);
       const taskData = params.arguments as TaskUpdate;
       const task = await TaskService.updateTask(id, { item: taskData });
-      return { content: [{ type: "text", text: JSON.stringify(task, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
+      };
     }
     case "delete_task": {
       const id = getIdValidated(params.arguments.id);
       const task = await TaskService.deleteTask(id);
-      return { content: [{ type: "text", text: JSON.stringify(task, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
+      };
     }
     case "add_task_comment": {
       const taskId = getIdValidated(params.arguments.taskId);
       const text = params.arguments.text;
       const commentData = { taskId, text } as CommentCreate;
       const comment = await CommentService.createComment({ item: commentData });
-      return { content: [{ type: "text", text: JSON.stringify(comment, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(comment, null, 2) }],
+      };
     }
     case "list_docs": {
       const docs = await DocService.listDocs(params.arguments);
-      return { content: [{ type: "text", text: JSON.stringify(docs, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(docs, null, 2) }],
+      };
     }
     case "create_doc": {
       const docData = params.arguments as DocCreate;
       const doc = await DocService.createDoc({ item: docData });
-      return { content: [{ type: "text", text: JSON.stringify(doc, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
+      };
     }
     case "get_doc": {
       const id = getIdValidated(params.arguments.id);
       const doc = await DocService.retrieveDoc(id);
-      return { content: [{ type: "text", text: JSON.stringify(doc, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
+      };
     }
     case "update_doc": {
       const id = getIdValidated(params.arguments.id);
       const docData = params.arguments as DocUpdate;
       const doc = await DocService.updateDoc(id, { item: docData });
-      return { content: [{ type: "text", text: JSON.stringify(doc, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
+      };
     }
     case "delete_doc": {
       const id = getIdValidated(params.arguments.id);
       const doc = await DocService.deleteDoc(id);
-      return { content: [{ type: "text", text: JSON.stringify(doc, null, 2) }] };
+      return {
+        content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
+      };
     }
     default:
       throw new Error(`Unknown tool: ${params.name}`);
@@ -482,28 +701,52 @@ handlers["callTool"] = async (params: any) => {
 const app = express();
 app.use(express.json());
 
-app.post("/rpc", async (req: express.Request, res: express.Response) => {
-  const { id, method, params } = req.body;
-  try {
-    if (!handlers[method]) {
-      throw new Error(`Unknown method: ${method}`);
-    }
-    const result = await handlers[method](params);
-    res.json({ jsonrpc: "2.0", id, result });
-  } catch (error: any) {
-    res.json({
-      jsonrpc: "2.0",
-      id,
-      error: { code: -32603, message: error.message }
-    });
+const authenticate = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res
+      .status(401)
+      .json({ error: "Missing or invalid Authorization header" });
   }
-});
+  const tokenProvided = authHeader.split(" ")[1];
+  if (tokenProvided !== token) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+  next();
+};
+
+app.post(
+  "/rpc",
+  authenticate as any,
+  async (req: express.Request, res: express.Response) => {
+    const { id, method, params } = req.body;
+    try {
+      if (!handlers[method]) {
+        throw new Error(`Unknown method: ${method}`);
+      }
+      const result = await handlers[method](params);
+      res.json({ jsonrpc: "2.0", id, result });
+    } catch (error: any) {
+      res.json({
+        jsonrpc: "2.0",
+        id,
+        error: { code: -32603, message: error.message },
+      });
+    }
+  }
+);
 
 app.get("/", (req, res) => {
-  res.send("Dart MCP HTTP server is running. Use POST /rpc for JSON-RPC requests.");
+  res.send(
+    "Dart MCP HTTP server is running. Use POST /rpc for JSON-RPC requests."
+  );
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Dart MCP HTTP server running on port ${port}`);
-}); 
+});
