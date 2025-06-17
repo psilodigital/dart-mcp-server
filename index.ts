@@ -55,9 +55,8 @@ const getIdValidated = (strMaybe: any): string => {
 };
 
 // Prompts
-const CREATE_TASK_PROMPT_NAME = "Create task";
 const CREATE_TASK_PROMPT: Prompt = {
-  name: CREATE_TASK_PROMPT_NAME,
+  name: "Create task",
   description: "Create a new task in Dart",
   arguments: [
     {
@@ -88,9 +87,8 @@ const CREATE_TASK_PROMPT: Prompt = {
   ],
 };
 
-const CREATE_DOC_PROMPT_NAME = "Create doc";
 const CREATE_DOC_PROMPT: Prompt = {
-  name: CREATE_DOC_PROMPT_NAME,
+  name: "Create doc",
   description: "Create a new document in Dart",
   arguments: [
     {
@@ -111,9 +109,8 @@ const CREATE_DOC_PROMPT: Prompt = {
   ],
 };
 
-const SUMMARIZE_TASKS_PROMPT_NAME = "Summarize tasks";
 const SUMMARIZE_TASKS_PROMPT: Prompt = {
-  name: SUMMARIZE_TASKS_PROMPT_NAME,
+  name: "Summarize tasks",
   description: "Get a summary of tasks with optional filtering",
   arguments: [
     {
@@ -130,17 +127,19 @@ const SUMMARIZE_TASKS_PROMPT: Prompt = {
 };
 
 // Resources
+const CONFIG_PROTOCOL = "dart-config";
 const CONFIG_RESOURCE_TEMPLATE: ResourceTemplate = {
-  uriTemplate: "dart-config:",
+  uriTemplate: `${CONFIG_PROTOCOL}:`,
   name: "Dart config",
   description:
     "Information about the authenticated user associated with the API key, including their role, teams, and settings.",
   parameters: {},
-  examples: ["dart-config:"],
+  examples: [`${CONFIG_PROTOCOL}:`],
 };
 
+const TASK_PROTOCOL = "dart-task:";
 const TASK_RESOURCE_TEMPLATE: ResourceTemplate = {
-  uriTemplate: "dart-task:///{taskId}",
+  uriTemplate: `${TASK_PROTOCOL}///{taskId}`,
   name: "Dart task",
   description:
     "A Dart task with its title, description, status, priority, dates, and more. Use this to fetch detailed information about a specific task.",
@@ -150,11 +149,12 @@ const TASK_RESOURCE_TEMPLATE: ResourceTemplate = {
       description: "The unique identifier of the Dart task",
     },
   },
-  examples: ["dart-task:///9q5qtB8n2Qn6"],
+  examples: [`${TASK_PROTOCOL}///9q5qtB8n2Qn6`],
 };
 
+const DOC_PROTOCOL = "dart-doc:";
 const DOC_RESOURCE_TEMPLATE: ResourceTemplate = {
-  uriTemplate: "dart-doc:///{docId}",
+  uriTemplate: `${DOC_PROTOCOL}///{docId}`,
   name: "Dart doc",
   description:
     "A Dart doc with its title, text content, and folder. Use this to fetch detailed information about a specific doc.",
@@ -164,7 +164,7 @@ const DOC_RESOURCE_TEMPLATE: ResourceTemplate = {
       description: "The unique identifier of the Dart doc",
     },
   },
-  examples: ["dart-doc:///9q5qtB8n2Qn6"],
+  examples: [`${DOC_PROTOCOL}///9q5qtB8n2Qn6`],
 };
 
 // Tools
@@ -582,6 +582,26 @@ const DELETE_DOC_TOOL: Tool = {
   },
 };
 
+const TOOLS = [
+  GET_CONFIG_TOOL,
+  LIST_TASKS_TOOL,
+  CREATE_TASK_TOOL,
+  GET_TASK_TOOL,
+  UPDATE_TASK_TOOL,
+  DELETE_TASK_TOOL,
+  ADD_TASK_COMMENT_TOOL,
+  LIST_DOCS_TOOL,
+  CREATE_DOC_TOOL,
+  GET_DOC_TOOL,
+  UPDATE_DOC_TOOL,
+  DELETE_DOC_TOOL,
+];
+const NO_ARGS_TOOL_NAMES = new Set(TOOLS.filter(
+  (tool) =>
+    !tool.inputSchema.properties ||
+    Object.keys(tool.inputSchema.properties).length === 0,
+).map((tool) => tool.name));
+
 // Server
 const server = new Server(
   {
@@ -602,14 +622,14 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => ({
 }));
 
 server.setRequestHandler(GetPromptRequestSchema, async (request) => {
-  const promptName = request.params.name;
+  const { name, arguments: args } = request.params;
 
-  if (promptName === CREATE_TASK_PROMPT_NAME) {
-    const title = request.params.arguments?.title || "(no title)";
-    const description = request.params.arguments?.description || "";
-    const status = request.params.arguments?.status || "";
-    const priority = request.params.arguments?.priority || "";
-    const assignee = request.params.arguments?.assignee || "";
+  if (name === CREATE_TASK_PROMPT.name) {
+    const title = args?.title || "(no title)";
+    const description = args?.description || "";
+    const status = args?.status || "";
+    const priority = args?.priority || "";
+    const assignee = args?.assignee || "";
 
     return {
       description: "Create a new task in Dart",
@@ -630,10 +650,10 @@ ${assignee ? `Assignee: ${assignee}` : ""}`,
     };
   }
 
-  if (promptName === CREATE_DOC_PROMPT_NAME) {
-    const title = request.params.arguments?.title || "(no title)";
-    const text = request.params.arguments?.text || "";
-    const folder = request.params.arguments?.folder || "";
+  if (name === CREATE_DOC_PROMPT.name) {
+    const title = args?.title || "(no title)";
+    const text = args?.text || "";
+    const folder = args?.folder || "";
 
     return {
       description: "Create a new document in Dart",
@@ -652,9 +672,9 @@ ${folder ? `Folder: ${folder}` : ""}`,
     };
   }
 
-  if (promptName === SUMMARIZE_TASKS_PROMPT_NAME) {
-    const status = request.params.arguments?.status || "";
-    const assignee = request.params.arguments?.assignee || "";
+  if (name === SUMMARIZE_TASKS_PROMPT.name) {
+    const status = args?.status || "";
+    const assignee = args?.assignee || "";
 
     return {
       description: "Get a summary of tasks with optional filtering",
@@ -671,7 +691,7 @@ Please include the total count, group by status, and list any high priority item
     };
   }
 
-  throw new Error(`Unknown prompt: ${promptName}`);
+  throw new Error(`Unknown prompt: ${name}`);
 });
 
 server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
@@ -688,7 +708,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const path = url.pathname.replace(/^\//, "");
   const { protocol } = url;
 
-  if (protocol === "dart-config") {
+  if (protocol === CONFIG_PROTOCOL) {
     const config = await ConfigService.getConfig();
     return {
       contents: [
@@ -701,7 +721,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     };
   }
 
-  if (protocol === "dart-task:") {
+  if (protocol === TASK_PROTOCOL) {
     const task = await TaskService.retrieveTask(path);
     return {
       contents: [
@@ -714,7 +734,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     };
   }
 
-  if (protocol === "dart-doc:") {
+  if (protocol === DOC_PROTOCOL) {
     const doc = await DocService.retrieveDoc(path);
     return {
       contents: [
@@ -731,58 +751,53 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 });
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [
-    GET_CONFIG_TOOL,
-    LIST_TASKS_TOOL,
-    CREATE_TASK_TOOL,
-    GET_TASK_TOOL,
-    UPDATE_TASK_TOOL,
-    DELETE_TASK_TOOL,
-    ADD_TASK_COMMENT_TOOL,
-    LIST_DOCS_TOOL,
-    CREATE_DOC_TOOL,
-    GET_DOC_TOOL,
-    UPDATE_DOC_TOOL,
-    DELETE_DOC_TOOL,
-  ],
+  tools: TOOLS,
 }));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: argsMaybe } = request.params;
+  let args: Record<string, unknown>;
   try {
-    if (!request.params.arguments) {
-      throw new Error("Arguments are required");
+    if (argsMaybe) {
+      args = argsMaybe;
+    } else {
+      if (!NO_ARGS_TOOL_NAMES.has(name)) {
+        throw new Error("Arguments are required");
+      } else {
+        args = {};
+      }
     }
 
-    switch (request.params.name) {
-      case "get_config": {
+    switch (name) {
+      case GET_CONFIG_TOOL.name: {
         const config = await ConfigService.getConfig();
         return {
           content: [{ type: "text", text: JSON.stringify(config, null, 2) }],
         };
       }
-      case "list_tasks": {
-        const tasks = await TaskService.listTasks(request.params.arguments);
+      case LIST_TASKS_TOOL.name: {
+        const tasks = await TaskService.listTasks(args);
         return {
           content: [{ type: "text", text: JSON.stringify(tasks, null, 2) }],
         };
       }
-      case "create_task": {
-        const taskData = request.params.arguments as TaskCreate;
+      case CREATE_TASK_TOOL.name: {
+        const taskData = args as TaskCreate;
         const task = await TaskService.createTask({ item: taskData });
         return {
           content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
         };
       }
-      case "get_task": {
-        const id = getIdValidated(request.params.arguments.id);
+      case GET_TASK_TOOL.name: {
+        const id = getIdValidated(args.id);
         const task = await TaskService.retrieveTask(id);
         return {
           content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
         };
       }
-      case "update_task": {
-        const id = getIdValidated(request.params.arguments.id);
-        const taskData = request.params.arguments as TaskUpdate;
+      case UPDATE_TASK_TOOL.name: {
+        const id = getIdValidated(args.id);
+        const taskData = args as TaskUpdate;
         const task = await TaskService.updateTask(id, {
           item: taskData,
         });
@@ -790,16 +805,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
         };
       }
-      case "delete_task": {
-        const id = getIdValidated(request.params.arguments.id);
+      case DELETE_TASK_TOOL.name: {
+        const id = getIdValidated(args.id);
         const task = await TaskService.deleteTask(id);
         return {
           content: [{ type: "text", text: JSON.stringify(task, null, 2) }],
         };
       }
-      case "add_task_comment": {
-        const taskId = getIdValidated(request.params.arguments.taskId);
-        const text = request.params.arguments.text;
+      case ADD_TASK_COMMENT_TOOL.name: {
+        const taskId = getIdValidated(args.taskId);
+        const text = args.text;
         const commentData = { taskId, text } as CommentCreate;
         const comment = await CommentService.createComment({
           item: commentData,
@@ -808,14 +823,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [{ type: "text", text: JSON.stringify(comment, null, 2) }],
         };
       }
-      case "list_docs": {
-        const docs = await DocService.listDocs(request.params.arguments);
+      case LIST_DOCS_TOOL.name: {
+        const docs = await DocService.listDocs(args);
         return {
           content: [{ type: "text", text: JSON.stringify(docs, null, 2) }],
         };
       }
-      case "create_doc": {
-        const docData = request.params.arguments as DocCreate;
+      case CREATE_DOC_TOOL.name: {
+        const docData = args as DocCreate;
         const doc = await DocService.createDoc({
           item: docData,
         });
@@ -823,30 +838,30 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
         };
       }
-      case "get_doc": {
-        const id = getIdValidated(request.params.arguments.id);
+      case GET_DOC_TOOL.name: {
+        const id = getIdValidated(args.id);
         const doc = await DocService.retrieveDoc(id);
         return {
           content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
         };
       }
-      case "update_doc": {
-        const id = getIdValidated(request.params.arguments.id);
-        const docData = request.params.arguments as DocUpdate;
+      case UPDATE_DOC_TOOL.name: {
+        const id = getIdValidated(args.id);
+        const docData = args as DocUpdate;
         const doc = await DocService.updateDoc(id, { item: docData });
         return {
           content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
         };
       }
-      case "delete_doc": {
-        const id = getIdValidated(request.params.arguments.id);
+      case DELETE_DOC_TOOL.name: {
+        const id = getIdValidated(args.id);
         const doc = await DocService.deleteDoc(id);
         return {
           content: [{ type: "text", text: JSON.stringify(doc, null, 2) }],
         };
       }
       default:
-        throw new Error(`Unknown tool: ${request.params.name}`);
+        throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error) {
     if (error instanceof ApiError) {
