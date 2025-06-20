@@ -7,16 +7,14 @@
 
 ## Local setup
 
-1. Run `yarn install` to install the dependencies
-2. Run `yarn build` to build the library
-3. Debug with the MCP inspector
+1. Copy `.env.example` to `.env` and fill out the environment variables
+2. Run `yarn install` to install the dependencies
+3. Run `yarn build` to build the library
+4. Debug with the MCP inspector
    1. Run `yarn start:mcp-inspector`
-   2. Set up your environment variables:
-      - Option A: Create a `.env` file in the project root with `DART_HOST` and `DART_TOKEN`
-      - Option B: Fill out the environment variables in the MCP Inspector UI when it is opened
-   3. Open [the page for the inspector](http://127.0.0.1:6274)
-   4. Click 'Connect'
-4. To use this with Claude Desktop, add the following to your `claude_desktop_config.json`:
+   2. Open [the page for the inspector](http://127.0.0.1:6274)
+   3. Click 'Connect'
+5. To use the local build with Claude Desktop, add the following to your `claude_desktop_config.json`:
 
    ```json
    {
