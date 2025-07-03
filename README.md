@@ -139,7 +139,7 @@ The easiest way to run the MCP server is with `npx`, but a Docker setup is also 
    }
    ```
 
-### Variant: setup with Docker
+### Variant: setup with Docker :)
 
 If the `npx` setup above does not work well, we also provide a Docker setup. Follow the instructions above to find the MCP settings file
 
