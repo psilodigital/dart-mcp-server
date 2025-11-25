@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   Prompt,
@@ -11,11 +12,11 @@ import {
   DocCreate,
   DocService,
   DocUpdate,
+  OpenAPI,
   TaskCreate,
   TaskService,
   TaskUpdate,
 } from "dart-tools";
-import "dotenv/config";
 import express from "express";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -28,6 +29,9 @@ if (!token) {
   console.error("DART_TOKEN environment variable is required");
   process.exit(1);
 }
+
+// Configure the dart-tools OpenAPI client with the token
+OpenAPI.TOKEN = token;
 
 const filename = fileURLToPath(import.meta.url);
 const packageJson = JSON.parse(
