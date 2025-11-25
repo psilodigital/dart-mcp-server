@@ -32,6 +32,12 @@ if (!token) {
 
 // Configure the dart-tools OpenAPI client with the token
 OpenAPI.TOKEN = token;
+// Also update HEADERS to ensure consistency
+OpenAPI.HEADERS = { Authorization: `Bearer ${token}` };
+console.log(
+  "OpenAPI configured with token:",
+  token ? `${token.substring(0, 10)}...` : "MISSING"
+);
 
 const filename = fileURLToPath(import.meta.url);
 const packageJson = JSON.parse(
