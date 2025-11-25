@@ -30,14 +30,15 @@ if (!token) {
   process.exit(1);
 }
 
-// Configure the dart-tools OpenAPI client with the token
+// Configure the dart-tools OpenAPI client with the token and host
 OpenAPI.TOKEN = token;
-// Also update HEADERS to ensure consistency
+OpenAPI.BASE = `${process.env.DART_HOST || "https://app.dartai.com"}/api/v0/public`;
 OpenAPI.HEADERS = { Authorization: `Bearer ${token}` };
 console.log(
   "OpenAPI configured with token:",
   token ? `${token.substring(0, 10)}...` : "MISSING"
 );
+console.log("OpenAPI BASE URL:", OpenAPI.BASE);
 
 const filename = fileURLToPath(import.meta.url);
 const packageJson = JSON.parse(
@@ -617,12 +618,31 @@ handlers["listTools"] = async (params: any) => ({
 });
 handlers["callTool"] = async (params: any) => {
   if (!params.name) throw new Error("Tool name is required");
+  console.log(`Calling tool: ${params.name}`);
+  console.log(
+    `OpenAPI.TOKEN:`,
+    typeof OpenAPI.TOKEN === "string"
+      ? OpenAPI.TOKEN.substring(0, 10) + "..."
+      : OpenAPI.TOKEN
+  );
+  console.log(`OpenAPI.HEADERS:`, OpenAPI.HEADERS);
   switch (params.name) {
     case "get_config": {
-      const config = await ConfigService.getConfig();
-      return {
-        content: [{ type: "text", text: JSON.stringify(config, null, 2) }],
-      };
+      try {
+        const config = await ConfigService.getConfig();
+        return {
+          content: [{ type: "text", text: JSON.stringify(config, null, 2) }],
+        };
+      } catch (error: any) {
+        console.error("Error calling ConfigService.getConfig():", error);
+        console.error("Error details:", {
+          message: error.message,
+          status: error.status,
+          body: error.body,
+          url: error.url,
+        });
+        throw error;
+      }
     }
     case "list_tasks": {
       const tasks = await TaskService.listTasks(params.arguments);
